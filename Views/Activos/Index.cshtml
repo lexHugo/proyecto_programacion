@@ -1,0 +1,44 @@
+@model IEnumerable<proyecto_programacion.Models.Activo>
+
+@{
+    ViewData["Title"] = "Inventario de Activos";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Creacion" class="btn btn-primary">Crear Nuevo Activo</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.nom_act)</th>
+            <th>@Html.DisplayNameFor(model => model.cod_act)</th>
+            <th>@Html.DisplayNameFor(model => model.Categoria.nom_categoria)</th>
+            <th>@Html.DisplayNameFor(model => model.Ubicacion.nom_ubica)</th>
+            <th>@Html.DisplayNameFor(model => model.estado)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.nom_act)</td>
+                <td>@Html.DisplayFor(modelItem => item.cod_act)</td>
+                
+                <td>@Html.DisplayFor(modelItem => item.Categoria.nom_categoria)</td>
+                
+                <td>@Html.DisplayFor(modelItem => item.Ubicacion.nom_ubica)</td>
+
+                <td>@Html.DisplayFor(modelItem => item.estado)</td>
+                <td>
+                    <a asp-action="Editar" asp-route-id="@item.activo_id" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="Detalles" asp-route-id="@item.activo_id" class="btn btn-sm btn-info">Detalles</a>
+                    <a asp-action="Eliminar" asp-route-id="@item.activo_id" class="btn btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

@@ -1,0 +1,54 @@
+@model proyecto_programacion.Models.CategoriaViewModel
+
+@{
+    ViewData["Title"] = "Gestión de Categorías";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Categorías Existentes</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.CategoriasExistentes.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var item in Model.CategoriasExistentes)
+                        {
+                            <li class="list-group-item">@item.nom_categoria</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No hay categorías creadas.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Añadir Nueva Categoría</h4>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Gestion" asp-action="CrearCategoria">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NuevaCategoria.nom_categoria" class="control-label">Nombre</label>
+                        <input asp-for="NuevaCategoria.nom_categoria" class="form-control" />
+                        <span asp-validation-for="NuevaCategoria.nom_categoria" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Guardar Categoría" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

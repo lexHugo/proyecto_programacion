@@ -1,0 +1,54 @@
+@model proyecto_programacion.Models.UbicacionViewModel
+
+@{
+    ViewData["Title"] = "Gestión de Ubicaciones";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Ubicaciones Existentes</h4>
+            </div>
+            <div class="card-body">
+                 @if (Model.UbicacionesExistentes.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var item in Model.UbicacionesExistentes)
+                        {
+                            <li class="list-group-item">@item.nom_ubica</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No hay ubicaciones creadas.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Añadir Nueva Ubicación</h4>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Gestion" asp-action="CrearUbicacion">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NuevaUbicacion.nom_ubica" class="control-label">Nombre</label>
+                        <input asp-for="NuevaUbicacion.nom_ubica" class="form-control" />
+                        <span asp-validation-for="NuevaUbicacion.nom_ubica" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Guardar Ubicación" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
