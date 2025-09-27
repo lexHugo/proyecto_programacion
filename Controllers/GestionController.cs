@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization; // <-- AÑADIDO: Necesario para la seguridad
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using proyecto_programacion.Data;
@@ -7,6 +8,10 @@ using System.Linq;
 
 namespace proyecto_programacion.Controllers;
 
+// --- CAMBIO AÑADIDO ---
+// Esta línea bloquea todo el controlador. Solo los usuarios que hayan iniciado sesión
+// Y que tengan el rol "Administrador" O "Gestor de Activos" podrán acceder.
+[Authorize(Roles = "Administrador,Gestor de Activos")]
 public class GestionController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -16,6 +21,7 @@ public class GestionController : Controller
         _context = context;
     }
 
+    // --- ACCIONES PARA CATEGORÍAS ---
 
     public async Task<IActionResult> Categorias()
     {
@@ -87,6 +93,7 @@ public class GestionController : Controller
         return RedirectToAction(nameof(Categorias));
     }
 
+    // --- ACCIONES PARA UBICACIONES (con Editar y Eliminar) ---
 
     public async Task<IActionResult> Ubicaciones()
     {
@@ -157,3 +164,4 @@ public class GestionController : Controller
         return RedirectToAction(nameof(Ubicaciones));
     }
 }
+

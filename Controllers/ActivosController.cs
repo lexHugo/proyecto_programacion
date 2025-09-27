@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization; // <-- AÑADIDO: Necesario para la seguridad
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace proyecto_programacion.Controllers;
 
+// --- CAMBIO AÑADIDO ---
+// Esta línea bloquea todo el controlador. Solo los usuarios que hayan iniciado sesión
+// Y que tengan el rol "Administrador" O "Gestor de Activos" podrán acceder.
+[Authorize(Roles = "Administrador,Gestor de Activos")]
 public class ActivosController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -17,6 +22,7 @@ public class ActivosController : Controller
         _context = context;
     }
 
+    // GET: Activos (Página principal que muestra la lista)
     public async Task<IActionResult> Index(string searchString, int? categoriaId, int? ubicacionId, string estado)
     {
         ViewData["CategoriasList"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", categoriaId);
@@ -36,8 +42,8 @@ public class ActivosController : Controller
 
         if (!string.IsNullOrEmpty(searchString))
         {
-            activosQuery = activosQuery.Where(a => 
-                a.nom_act.ToLower().Contains(searchString.ToLower()) || 
+            activosQuery = activosQuery.Where(a =>
+                a.nom_act.ToLower().Contains(searchString.ToLower()) ||
                 a.cod_act.ToLower().Contains(searchString.ToLower())
             );
         }
@@ -60,7 +66,7 @@ public class ActivosController : Controller
         return View(await activosQuery.ToListAsync());
     }
 
-    
+
     public async Task<IActionResult> Detalles(int? id)
     {
         if (id == null) return NotFound();
@@ -76,9 +82,7 @@ public class ActivosController : Controller
     {
         ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria");
         ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica");
-        
         ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" });
-
         return View();
     }
 
@@ -94,16 +98,16 @@ public class ActivosController : Controller
         }
         ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
         ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
+        ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" }, activo.estado);
         return View(activo);
     }
 
     public async Task<IActionResult> Editar(int? id)
     {
         if (id == null) return NotFound();
-
         var activo = await _context.Activos.FindAsync(id);
         if (activo == null) return NotFound();
-            
+        
         ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
         ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
         ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" }, activo.estado);
@@ -139,7 +143,6 @@ public class ActivosController : Controller
         return View(activo);
     }
 
-
     public async Task<IActionResult> Eliminar(int? id)
     {
         if (id == null) return NotFound();
@@ -169,5 +172,3 @@ public class ActivosController : Controller
         return _context.Activos.Any(e => e.activo_id == id);
     }
 }
-
-    

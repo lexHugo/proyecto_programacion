@@ -1,10 +1,10 @@
 /* --- Paleta de Colores y Variables Globales --- */
 :root {
-    --sidebar-bg: #1e293b;
+    --sidebar-bg: #1e293b; /* Azul oscuro corporativo */
     --sidebar-text: #cbd5e1;
     --sidebar-text-hover: #ffffff;
     --sidebar-bg-hover: #334155;
-    --content-bg: #f8fafc;
+    --content-bg: #f8fafc; /* Gris muy claro para el fondo */
     --primary-color: #3b82f6;
     --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
@@ -26,12 +26,15 @@ html {
 
 body {
   margin: 0;
-  display: flex;
   background-color: var(--content-bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* --- Estilos del Sidebar --- */
+/* --- Estilos del Layout Principal con Sidebar --- */
+body:not(.auth-body) {
+    display: flex;
+}
+
 .sidebar {
     width: 260px;
     background-color: var(--sidebar-bg);
@@ -97,7 +100,52 @@ body {
     padding: 2rem;
 }
 
-/* Mejoras visuales para las tarjetas y tablas */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.user-menu .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.user-menu .dropdown-toggle::after {
+    display: none; /* Oculta la flecha por defecto de Bootstrap */
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    margin-right: 0.75rem;
+}
+
+.dropdown-item i {
+    width: 20px;
+}
+
+/* --- Mejoras visuales para las tarjetas y tablas --- */
 .card {
     border: none;
     border-radius: 0.5rem;
@@ -113,3 +161,51 @@ body {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
+
+
+/* --- ESTILOS ADICIONALES PARA PÁGINAS DE AUTENTICACIÓN --- */
+
+.auth-body {
+    display: block; /* Resetea el display:flex del body principal */
+    min-height: 100vh;
+    background-color: #f1f5f9; /* Un gris un poco más oscuro para el fondo */
+}
+
+.auth-body .auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.auth-card {
+    max-width: 450px;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    padding: 2.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header .logo-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.auth-header .logo-text {
+    margin-left: 0.75rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e2b3c; /* Cambiado para mejor contraste sobre fondo blanco */
+    margin-bottom: 0;
+}
+
