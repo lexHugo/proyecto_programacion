@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using proyecto_programacion.Data;
 using proyecto_programacion.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace proyecto_programacion.Controllers;
 
@@ -15,45 +17,74 @@ public class ActivosController : Controller
         _context = context;
     }
 
-    // GET: Activos (Página principal que muestra la lista)
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string searchString, int? categoriaId, int? ubicacionId, string estado)
     {
-        var activos = _context.Activos
+        ViewData["CategoriasList"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", categoriaId);
+        ViewData["UbicacionesList"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", ubicacionId);
+        var estadosList = new List<string> { "Operativo", "En Reparación", "De Baja" };
+        ViewData["EstadosList"] = new SelectList(estadosList, estado);
+
+        ViewData["CurrentFilter"] = searchString;
+        ViewData["CurrentCategoria"] = categoriaId;
+        ViewData["CurrentUbicacion"] = ubicacionId;
+        ViewData["CurrentEstado"] = estado;
+
+        var activosQuery = _context.Activos
             .Include(a => a.Categoria)
-            .Include(a => a.Ubicacion);
-        return View(await activos.ToListAsync());
+            .Include(a => a.Ubicacion)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            activosQuery = activosQuery.Where(a => 
+                a.nom_act.ToLower().Contains(searchString.ToLower()) || 
+                a.cod_act.ToLower().Contains(searchString.ToLower())
+            );
+        }
+
+        if (categoriaId.HasValue)
+        {
+            activosQuery = activosQuery.Where(a => a.categ_id == categoriaId.Value);
+        }
+
+        if (ubicacionId.HasValue)
+        {
+            activosQuery = activosQuery.Where(a => a.ubic_id == ubicacionId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(estado))
+        {
+            activosQuery = activosQuery.Where(a => a.estado == estado);
+        }
+
+        return View(await activosQuery.ToListAsync());
     }
 
-    // GET: Activos/Details/5 (Ver el detalle de un activo)
-        public async Task<IActionResult> Detalles(int? id)
+    
+    public async Task<IActionResult> Detalles(int? id)
     {
         if (id == null) return NotFound();
-
         var activo = await _context.Activos
             .Include(a => a.Categoria)
             .Include(a => a.Ubicacion)
             .FirstOrDefaultAsync(m => m.activo_id == id);
-        
         if (activo == null) return NotFound();
         return View(activo);
     }
 
-    // GET: Activos/Create (Muestra el formulario para crear)
     public IActionResult Creacion()
     {
-        // Asegúrate que "categ_id" y "nom_categoria" sean los nombres EXACTOS de las propiedades en tu Categoria.cs
-        ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria"); 
-        
-        // Asegúrate que "ubic_id" y "nom_ubica" sean los nombres EXACTOS de las propiedades en tu Ubicacion.cs
+        ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria");
         ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica");
         
+        ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" });
+
         return View();
     }
 
-    // POST: Activos/Create (Recibe los datos del formulario y los guarda)
     [HttpPost]
     [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Creacion([Bind("activo_id,nom_act,cod_act,modelo,num_serie,costo,fecha_com,proveedor,estado,categ_id,ubic_id")] Activo activo)
+    public async Task<IActionResult> Creacion([Bind("activo_id,nom_act,cod_act,modelo,num_serie,costo,fecha_com,proveedor,estado,categ_id,ubic_id")] Activo activo)
     {
         if (ModelState.IsValid)
         {
@@ -66,24 +97,25 @@ public class ActivosController : Controller
         return View(activo);
     }
 
-    // GET: Activos/Edit/5 (Muestra el formulario para editar)
     public async Task<IActionResult> Editar(int? id)
     {
         if (id == null) return NotFound();
-    var activo = await _context.Activos.FindAsync(id);
-    if (activo == null) return NotFound();
-        
-    ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
-    ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
-    return View(activo);
+
+        var activo = await _context.Activos.FindAsync(id);
+        if (activo == null) return NotFound();
+            
+        ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
+        ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
+        ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" }, activo.estado);
+
+        return View(activo);
     }
 
-    // POST: Activos/Edit/5 (Recibe los datos y los actualiza)
     [HttpPost]
     [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(int id, [Bind("activo_id,nom_act,cod_act,modelo,num_serie,costo,fecha_com,proveedor,estado,categ_id,ubic_id")] Activo activo)
+    public async Task<IActionResult> Editar(int id, [Bind("activo_id,nom_act,cod_act,modelo,num_serie,costo,fecha_com,proveedor,estado,categ_id,ubic_id")] Activo activo)
     {
-    if (id != activo.activo_id) return NotFound();
+        if (id != activo.activo_id) return NotFound();
 
         if (ModelState.IsValid)
         {
@@ -99,42 +131,43 @@ public class ActivosController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
-    ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
-    ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
-    return View(activo);
+
+        ViewData["categ_id"] = new SelectList(_context.Categorias, "categ_id", "nom_categoria", activo.categ_id);
+        ViewData["ubic_id"] = new SelectList(_context.Ubicaciones, "ubic_id", "nom_ubica", activo.ubic_id);
+        ViewData["EstadosList"] = new SelectList(new List<string> { "Operativo", "En Reparación", "De Baja" }, activo.estado);
+        
+        return View(activo);
     }
 
-    // GET: Activos/Delete/5 (Muestra la página de confirmación para eliminar)
-        public async Task<IActionResult> Eliminar(int? id)
+
+    public async Task<IActionResult> Eliminar(int? id)
     {
         if (id == null) return NotFound();
-
         var activo = await _context.Activos
             .Include(a => a.Categoria)
             .Include(a => a.Ubicacion)
             .FirstOrDefaultAsync(m => m.activo_id == id);
-            
         if (activo == null) return NotFound();
         return View(activo);
     }
 
-    // POST: Activos/Delete/5 (Confirma y elimina el registro)
     [HttpPost, ActionName("Eliminar")]
     [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EliminarConfirmado(int id)
+    public async Task<IActionResult> EliminarConfirmado(int id)
     {
-    var activo = await _context.Activos.FindAsync(id);
+        var activo = await _context.Activos.FindAsync(id);
         if (activo != null)
         {
             _context.Activos.Remove(activo);
         }
-
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     private bool ActivoExists(int id)
     {
-    return _context.Activos.Any(e => e.activo_id == id);
+        return _context.Activos.Any(e => e.activo_id == id);
     }
 }
+
+    
